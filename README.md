@@ -43,7 +43,6 @@ Abra o arquivo frontend/index.html no navegador ou use o Live Server do VS Code.
 Abra no navegador: http://localhost:5000/api/produtos
 
 
-
 📦 Lista de pacotes instalados
 Pacote	Versão
 Flask	2.3.3
