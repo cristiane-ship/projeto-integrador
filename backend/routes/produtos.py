@@ -125,3 +125,69 @@ def listar_categorias():
     """, fetch_all=True)
     
     return jsonify([c['categoria'] for c in categorias])
+
+@produtos_bp.route('/<int:produto_id>', methods=['PUT'])
+@token_required
+def atualizar_produto(produto_id):
+    data = request.json
+    
+    # Verificar se produto existe e pertence ao vendedor
+    produto = execute_query("""
+        SELECT p.*, v.id_usuario as vendedor_usuario_id
+        FROM produto p
+        JOIN vendedor v ON p.id_vendedor = v.id_vendedor
+        WHERE p.id_produto = %s
+    """, (produto_id,), fetch_one=True)
+    
+    if not produto:
+        return jsonify({'error': 'Produto não encontrado'}), 404
+    
+    # Verificar permissão (dono do produto ou admin)
+    if produto['vendedor_usuario_id'] != request.user_id and request.user_role not in ['admin', 'root']:
+        return jsonify({'error': 'Você não tem permissão para editar este produto'}), 403
+    
+    # Atualizar produto
+    execute_query("""
+        UPDATE produto 
+        SET nome=%s, descricao=%s, preco=%s, categoria=%s, imagem_url=%s, status=%s
+        WHERE id_produto = %s
+    """, (
+        data.get('nome'), 
+        data.get('descricao'), 
+        data.get('preco'), 
+        data.get('categoria'),
+        data.get('imagem_url'), 
+        data.get('status', 'ativo'), 
+        produto_id
+    ), commit=True)
+    
+    # Atualizar estoque se veio quantidade
+    if data.get('quantidade') is not None:
+        execute_query("""
+            UPDATE estoque SET quantidade = %s WHERE id_produto = %s
+        """, (data['quantidade'], produto_id), commit=True)
+    
+    return jsonify({'message': 'Produto atualizado com sucesso'})
+
+@produtos_bp.route('/<int:produto_id>', methods=['DELETE'])
+@token_required
+def deletar_produto(produto_id):
+    # Verificar se produto existe e pertence ao vendedor
+    produto = execute_query("""
+        SELECT p.*, v.id_usuario as vendedor_usuario_id
+        FROM produto p
+        JOIN vendedor v ON p.id_vendedor = v.id_vendedor
+        WHERE p.id_produto = %s
+    """, (produto_id,), fetch_one=True)
+    
+    if not produto:
+        return jsonify({'error': 'Produto não encontrado'}), 404
+    
+    # Verificar permissão
+    if produto['vendedor_usuario_id'] != request.user_id and request.user_role not in ['admin', 'root']:
+        return jsonify({'error': 'Você não tem permissão para deletar este produto'}), 403
+    
+    # Deletar produto (cascade vai deletar estoque também)
+    execute_query("DELETE FROM produto WHERE id_produto = %s", (produto_id,), commit=True)
+    
+    return jsonify({'message': 'Produto deletado com sucesso'})

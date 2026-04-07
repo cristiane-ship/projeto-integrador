@@ -6,14 +6,19 @@ import os
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 app.config['SECRET_KEY'] = Config.SECRET_KEY
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-# CORS para desenvolvimento
-CORS(app, origins=['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5000'])
+# Configurar CORS corretamente
+CORS(app, 
+     origins=['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5000'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization'],
+     supports_credentials=True)
 
 # Registrar rotas da API
 register_routes(app)
 
-# Servir frontend (opcional - em produção)
+# Servir frontend
 @app.route('/')
 def serve_frontend():
     return send_from_directory('../frontend', 'index.html')
