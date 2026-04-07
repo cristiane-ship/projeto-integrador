@@ -1,39 +1,73 @@
-# 🎲 Rifa Online - Sistema de Rifas
+# SYP Shop - Guia de Instalação e Execução
 
-## 📋 Pré-requisitos
+### 📋 Pré-requisitos
 
-- Python 3.8+
-- MySQL (Workbench)
-- VS Code (opcional)
+- Python 3.8 ou superior
+- MySQL Server 8.0 ou superior
+- Pip (gerenciador de pacotes Python)
 
-## 🚀 Como rodar o projeto
+### 🚀 Instalação e Execução
 
-### 1. Backend (API)
+### 1. Instalar dependências do Python
 
-```bash
-# Entrar na pasta do backend
-cd backend-rifa
+### Entrar na pasta do backend
+cd backend
 
-# Criar ambiente virtual
-python -m venv venv
+### Instalar todos os pacotes necessários
+pip install Flask flask-cors PyJWT mysql-connector-python python-dotenv bcrypt
 
-# Ativar ambiente virtual
-# Windows:
-.\venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
+2. Configurar o banco de dados
+Certifique-se que o MySQL está rodando e execute:
+mysql -u root -p
 
-# Instalar dependências
-pip install Flask flask-cors mysql-connector-python python-dotenv PyJWT
+Dentro do MySQL, execute os comandos SQL para criar o banco e as tabelas.
 
-# Criar banco de dados no MySQL Workbench
-# Executar o script: database.sql
+3. Configurar variáveis de ambiente
+Crie o arquivo backend/.env com o seguinte conteúdo:
 
-# Configurar .env (ajustar senha do MySQL)
-MYSQL_HOST=localhost
-MYSQL_USER=root
-MYSQL_PASSWORD=sua_senha
-MYSQL_DATABASE=rifa_online
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=sua_senha_aqui
+DB_NAME=syp_ecommerce
+PORT=5000
 
-# Rodar o servidor
+4. Rodar o backend
+### Dentro da pasta backend
 python app.py
+O servidor irá rodar em http://localhost:5000
+
+5. Rodar o frontend
+Abra o arquivo frontend/index.html no navegador ou use o Live Server do VS Code.
+
+✅ Verificando se funcionou
+Abra no navegador: http://localhost:5000/api/produtos
+
+
+
+📦 Lista de pacotes instalados
+Pacote	Versão
+Flask	2.3.3
+flask-cors	4.0.0
+PyJWT	2.8.0
+mysql-connector-python	8.1.0
+python-dotenv	1.0.0
+bcrypt	4.0.1
+
+⚠️ Resolução de problemas
+Erro: 'pip' não é reconhecido
+
+python -m pip install Flask flask-cors PyJWT mysql-connector-python python-dotenv bcrypt
+Erro: MySQL não conecta
+
+Verifique se o MySQL está rodando: sudo systemctl status mysql (Linux) ou Services (Windows)
+
+Confirme a senha no arquivo .env
+
+Erro: porta 5000 já está em uso
+
+Altere a porta no arquivo .env: PORT=5001
+
+### Comando único para instalar tudo
+
+cd backend && pip install Flask flask-cors PyJWT mysql-connector-python python-dotenv bcrypt && python app.py
+
