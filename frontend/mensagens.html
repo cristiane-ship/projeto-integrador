@@ -1,1 +1,77 @@
  
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagens - SYP Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="index.html#produtos">Produtos</a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 40px 0;">
+        <h1>Mensagens</h1>
+        
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-lg); background: var(--bg-white); border-radius: var(--radius-lg); overflow: hidden; min-height: 500px;">
+            <!-- Lista de Conversas -->
+            <div class="conversas-lista" style="border-right: 1px solid var(--border); overflow-y: auto;">
+                <div style="padding: var(--spacing-md); background: var(--bg-light); border-bottom: 1px solid var(--border);">
+                    <h3>Conversas</h3>
+                </div>
+                <div id="conversas-container">
+                    <div class="loading-spinner" style="padding: var(--spacing-xl);">Carregando...</div>
+                </div>
+            </div>
+            
+            <!-- Área da Conversa -->
+            <div class="conversa-area" style="display: flex; flex-direction: column;">
+                <div id="conversa-header" style="padding: var(--spacing-md); border-bottom: 1px solid var(--border); background: var(--bg-light);">
+                    <p style="color: var(--text-secondary);">Selecione uma conversa para começar</p>
+                </div>
+                
+                <div id="mensagens-container" style="flex: 1; overflow-y: auto; padding: var(--spacing-md); min-height: 350px;">
+                    <div class="alert alert-info" style="text-align: center;">Nenhuma conversa selecionada</div>
+                </div>
+                
+                <div id="mensagem-input-area" style="padding: var(--spacing-md); border-top: 1px solid var(--border); display: none;">
+                    <div style="display: flex; gap: var(--spacing-md);">
+                        <input type="text" id="nova-mensagem" placeholder="Digite sua mensagem..." style="flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                        <button onclick="enviarMensagem()" class="btn-primary">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/mensagens.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao(true);
+            atualizarMenuUsuario();
+            await carregarConversas();
+        });
+    </script>
+</body>
+</html>

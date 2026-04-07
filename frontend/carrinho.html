@@ -1,1 +1,75 @@
  
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Carrinho - SYP Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/carrinho.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="index.html#produtos">Produtos</a>
+                <a href="carrinho.html" class="cart-icon">
+                    🛒 Carrinho
+                    <span id="cart-count" class="cart-count">0</span>
+                </a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 40px 0;">
+        <h1>Meu Carrinho</h1>
+        
+        <div class="carrinho-container">
+            <div class="carrinho-itens" id="carrinho-itens">
+                <div class="loading-spinner">Carregando carrinho...</div>
+            </div>
+            
+            <div class="carrinho-resumo" id="carrinho-resumo">
+                <h3>Resumo do pedido</h3>
+                <div class="resumo-linha">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="resumo-linha">
+                    <span>Frete:</span>
+                    <span id="frete">A calcular</span>
+                </div>
+                <div class="resumo-linha total">
+                    <span>Total:</span>
+                    <span id="total">R$ 0,00</span>
+                </div>
+                <button id="btn-finalizar" class="btn-primary btn-block" onclick="irParaCheckout()">Finalizar Compra</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/carrinho.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao(true);
+            atualizarMenuUsuario();
+            await carregarCarrinho();
+        });
+    </script>
+</body>
+</html>

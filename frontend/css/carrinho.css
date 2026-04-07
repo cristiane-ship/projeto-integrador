@@ -1,1 +1,110 @@
- 
+
+.carrinho-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+}
+
+.carrinho-item {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: var(--spacing-md);
+    background: var(--bg-white);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    align-items: center;
+}
+
+.carrinho-item-imagem {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+}
+
+.carrinho-item-info h3 {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.carrinho-item-preco {
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.carrinho-item-quantidade {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.carrinho-item-quantidade button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border);
+    background: var(--bg-white);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.carrinho-item-quantidade span {
+    min-width: 30px;
+    text-align: center;
+}
+
+.carrinho-item-remover {
+    color: var(--danger);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+}
+
+.carrinho-resumo {
+    background: var(--bg-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.resumo-linha {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.resumo-linha.total {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary);
+    border-bottom: none;
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+}
+
+.carrinho-vazio {
+    text-align: center;
+    padding: var(--spacing-xl);
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+}
+
+@media (max-width: 768px) {
+    .carrinho-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .carrinho-item {
+        grid-template-columns: 80px 1fr;
+    }
+    
+    .carrinho-item-quantidade {
+        grid-column: 2;
+        justify-content: flex-start;
+    }
+}

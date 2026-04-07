@@ -1,1 +1,79 @@
- 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos - SYP Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="index.html#produtos">Produtos</a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 40px 0;">
+        <h1>Meus Pedidos</h1>
+        
+        <div id="pedidos-container">
+            <div class="loading-spinner">Carregando pedidos...</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao(true);
+            atualizarMenuUsuario();
+            await carregarPedidos();
+        });
+        
+        async function carregarPedidos() {
+            const container = document.getElementById('pedidos-container');
+            
+            try {
+                const pedidos = await API.listarPedidos();
+                
+                if (pedidos.length === 0) {
+                    container.innerHTML = '<p class="loading-spinner">Você ainda não fez nenhum pedido.</p>';
+                    return;
+                }
+                
+                container.innerHTML = pedidos.map(pedido => `
+                    <div class="pedido-card" style="background: white; border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-md);">
+                            <strong>Pedido #${pedido.id_pedido}</strong>
+                            <span class="badge-stock">${pedido.status}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
+                            <span>Data: ${formatarData(pedido.data_pedido)}</span>
+                            <span>Total: ${formatarMoeda(pedido.valor_total)}</span>
+                        </div>
+                        <a href="pedido-detalhe.html?id=${pedido.id_pedido}" class="btn-outline" style="margin-top: var(--spacing-md); display: inline-block;">Ver Detalhes</a>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                container.innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,1 +1,98 @@
- 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - SYP Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="index.html#produtos">Produtos</a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 60px 0;">
+        <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <div style="background: var(--success); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                <span style="font-size: 48px;">✓</span>
+            </div>
+            
+            <h1 style="color: var(--success); margin-bottom: 16px;">Pedido Confirmado!</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 32px;">
+                Seu pedido foi realizado com sucesso. Você receberá um e-mail com os detalhes da compra.
+            </p>
+            
+            <div class="pedido-info" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 32px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border);">
+                    <strong>Número do Pedido:</strong>
+                    <span id="pedido-numero">#---</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border);">
+                    <strong>Data:</strong>
+                    <span id="pedido-data">---</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border);">
+                    <strong>Status:</strong>
+                    <span class="badge-stock" id="pedido-status">Pago</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>Total:</strong>
+                    <strong style="color: var(--primary);" id="pedido-total">R$ 0,00</strong>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center;">
+                <a href="meus-pedidos.html" class="btn-secondary">Meus Pedidos</a>
+                <a href="index.html" class="btn-primary">Continuar Comprando</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao(false);
+            atualizarMenuUsuario();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const pedidoId = urlParams.get('id');
+            
+            if (pedidoId) {
+                await carregarDetalhesPedido(pedidoId);
+            }
+        });
+        
+        async function carregarDetalhesPedido(pedidoId) {
+            try {
+                const pedido = await API.getPedido(pedidoId);
+                
+                document.getElementById('pedido-numero').textContent = `#${pedido.id_pedido}`;
+                document.getElementById('pedido-data').textContent = formatarDataHora(pedido.data_pedido);
+                document.getElementById('pedido-status').textContent = pedido.status;
+                document.getElementById('pedido-total').textContent = formatarMoeda(pedido.valor_total);
+                
+            } catch (error) {
+                console.error('Erro ao carregar pedido:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

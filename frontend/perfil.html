@@ -1,1 +1,183 @@
- 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - SYP Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="index.html#produtos">Produtos</a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 40px 0;">
+        <h1>Meu Perfil</h1>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-lg);">
+            <div class="perfil-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                <h3>Dados Pessoais</h3>
+                <div id="dados-usuario">
+                    <div class="loading-spinner">Carregando...</div>
+                </div>
+            </div>
+            
+            <div class="enderecos-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                    <h3>Meus Endereços</h3>
+                    <button class="btn-outline" onclick="mostrarModalEndereco()" style="padding: 6px 12px;">+ Novo</button>
+                </div>
+                <div id="lista-enderecos">
+                    <div class="loading-spinner">Carregando endereços...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-endereco" class="modal">
+        <div class="modal-content">
+            <h2>Novo Endereço</h2>
+            <form id="endereco-form">
+                <div class="form-group">
+                    <label>CEP</label>
+                    <input type="text" id="cep" oninput="mascaraCEP(this)" required>
+                </div>
+                <div class="form-group">
+                    <label>Logradouro</label>
+                    <input type="text" id="logradouro" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Número</label>
+                        <input type="text" id="numero" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Complemento</label>
+                        <input type="text" id="complemento">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bairro</label>
+                    <input type="text" id="bairro" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" id="cidade" required>
+                    </div>
+                    <div class="form-group">
+                        <label>UF</label>
+                        <input type="text" id="estado" maxlength="2" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+                    <button type="submit" class="btn-primary">Salvar</button>
+                    <button type="button" class="btn-outline" onclick="fecharModalEndereco()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        let enderecos = [];
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao(true);
+            atualizarMenuUsuario();
+            await carregarDadosUsuario();
+            await carregarEnderecos();
+        });
+        
+        async function carregarDadosUsuario() {
+            const container = document.getElementById('dados-usuario');
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/auth/me`, {
+                    headers: getAuthHeaders()
+                });
+                
+                const user = await response.json();
+                
+                if (response.ok) {
+                    container.innerHTML = `
+                        <div class="info-row" style="margin-bottom: var(--spacing-md);">
+                            <strong>Nome:</strong>
+                            <p>${user.nome}</p>
+                        </div>
+                        <div class="info-row" style="margin-bottom: var(--spacing-md);">
+                            <strong>E-mail:</strong>
+                            <p>${user.email}</p>
+                        </div>
+                        <div class="info-row" style="margin-bottom: var(--spacing-md);">
+                            <strong>Tipo:</strong>
+                            <p>${user.role === 'vendedor' ? 'Vendedor' : user.role === 'admin' ? 'Administrador' : 'Cliente'}</p>
+                        </div>
+                        <div class="info-row">
+                            <strong>Cadastrado em:</strong>
+                            <p>${formatarData(user.data_cadastro)}</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="alert alert-error">${user.error}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="alert alert-error">Erro ao carregar dados</div>`;
+            }
+        }
+        
+        async function carregarEnderecos() {
+            const container = document.getElementById('lista-enderecos');
+            
+            // Simular endereços por enquanto (backend será implementado depois)
+            container.innerHTML = `
+                <div class="endereco-item" style="padding: var(--spacing-md); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
+                    <p><strong>Rua Exemplo, 123</strong></p>
+                    <p>Centro - São Paulo/SP</p>
+                    <p>CEP: 00000-000</p>
+                    <button class="btn-outline" style="margin-top: var(--spacing-sm); padding: 4px 12px; font-size: 0.8rem;">Editar</button>
+                </div>
+                <div class="endereco-item" style="padding: var(--spacing-md); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
+                    <p><strong>Av. Paulista, 1000</strong></p>
+                    <p>Bela Vista - São Paulo/SP</p>
+                    <p>CEP: 01310-000</p>
+                    <button class="btn-outline" style="margin-top: var(--spacing-sm); padding: 4px 12px; font-size: 0.8rem;">Editar</button>
+                </div>
+            `;
+        }
+        
+        function mostrarModalEndereco() {
+            document.getElementById('modal-endereco').classList.add('active');
+        }
+        
+        function fecharModalEndereco() {
+            document.getElementById('modal-endereco').classList.remove('active');
+            document.getElementById('endereco-form').reset();
+        }
+        
+        document.getElementById('endereco-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            mostrarMensagem('Funcionalidade em desenvolvimento', 'warning');
+            fecharModalEndereco();
+        });
+    </script>
+</body>
+</html> 

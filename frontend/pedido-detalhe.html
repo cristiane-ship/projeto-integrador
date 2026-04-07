@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Pedido - SYP Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="index.html#produtos">Produtos</a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 40px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+            <h1>Detalhes do Pedido</h1>
+            <a href="meus-pedidos.html" class="btn-outline">← Voltar</a>
+        </div>
+        
+        <div id="pedido-detalhe">
+            <div class="loading-spinner">Carregando detalhes do pedido...</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao(true);
+            atualizarMenuUsuario();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const pedidoId = urlParams.get('id');
+            
+            if (pedidoId) {
+                await carregarDetalhesPedido(pedidoId);
+            } else {
+                window.location.href = 'meus-pedidos.html';
+            }
+        });
+        
+        async function carregarDetalhesPedido(pedidoId) {
+            const container = document.getElementById('pedido-detalhe');
+            
+            try {
+                const pedido = await API.getPedido(pedidoId);
+                
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl);">
+                        <div>
+                            <div class="info-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+                                <h3 style="margin-bottom: var(--spacing-md);">Informações do Pedido</h3>
+                                <div class="info-row" style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                    <strong>Número:</strong>
+                                    <span>#${pedido.id_pedido}</span>
+                                </div>
+                                <div class="info-row" style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                    <strong>Data:</strong>
+                                    <span>${formatarDataHora(pedido.data_pedido)}</span>
+                                </div>
+                                <div class="info-row" style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                    <strong>Status:</strong>
+                                    <span class="badge-stock">${pedido.status}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="endereco-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                                <h3 style="margin-bottom: var(--spacing-md);">Endereço de Entrega</h3>
+                                <p>${pedido.logradouro || '---'}, ${pedido.numero || '---'}</p>
+                                <p>${pedido.bairro || '---'} - ${pedido.cidade || '---'}/${pedido.estado || '---'}</p>
+                                <p>CEP: ${pedido.cep || '---'}</p>
+                                <p style="margin-top: var(--spacing-sm);"><strong>Transportadora:</strong> ${pedido.transportadora_nome || '---'}</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="itens-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                                <h3 style="margin-bottom: var(--spacing-md);">Itens do Pedido</h3>
+                                ${pedido.itens?.map(item => `
+                                    <div style="display: flex; gap: var(--spacing-md); padding: var(--spacing-md) 0; border-bottom: 1px solid var(--border);">
+                                        <img src="${item.imagem_url || 'assets/img/placeholder.jpg'}" 
+                                             style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-sm);"
+                                             onerror="this.src='assets/img/placeholder.jpg'">
+                                        <div style="flex: 1;">
+                                            <h4>${item.nome}</h4>
+                                            <p>Quantidade: ${item.quantidade}</p>
+                                            <p class="product-price" style="margin-top: var(--spacing-xs);">${formatarMoeda(item.preco_unitario)}</p>
+                                        </div>
+                                    </div>
+                                `).join('') || '<p>Nenhum item encontrado</p>'}
+                                
+                                <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-md); border-top: 2px solid var(--border);">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                        <span>Subtotal:</span>
+                                        <span>${formatarMoeda(pedido.valor_total - (pedido.valor_frete || 0))}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                        <span>Frete:</span>
+                                        <span>${formatarMoeda(pedido.valor_frete || 0)}</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 2px solid var(--border);">
+                                        <strong>Total:</strong>
+                                        <strong style="color: var(--primary); font-size: 1.2rem;">${formatarMoeda(pedido.valor_total)}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                container.innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

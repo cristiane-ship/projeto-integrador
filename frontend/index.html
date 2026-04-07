@@ -1,1 +1,80 @@
  
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYP Shop - Sua Loja Online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar container">
+            <a href="index.html" class="logo">
+                <span>SYP</span><span>Shop</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="#" id="categorias-link">Categorias</a>
+                <a href="#" id="ofertas-link">Ofertas</a>
+                <a href="carrinho.html" class="cart-icon">
+                    🛒 Carrinho
+                    <span id="cart-count" class="cart-count">0</span>
+                </a>
+                <div id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 60px 0; text-align: center;">
+            <div class="container">
+                <h1 style="font-size: 2.5rem; margin-bottom: 16px;">Bem-vindo ao SYP Shop</h1>
+                <p style="font-size: 1.2rem; margin-bottom: 24px;">Os melhores produtos com os melhores preços!</p>
+                <a href="#produtos" class="btn-primary" style="background: white; color: var(--primary);">Ver Produtos</a>
+            </div>
+        </section>
+
+        <section id="produtos" class="container">
+            <h2 style="margin: 32px 0 16px;">Produtos em Destaque</h2>
+            <div class="products-grid" id="products-grid">
+                <div class="loading-spinner">Carregando produtos...</div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SYP Shop - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/produtos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            verificarAutenticacao(false);
+            atualizarMenuUsuario();
+            carregarProdutos();
+            atualizarContadorCarrinho();
+        });
+        
+        async function atualizarContadorCarrinho() {
+            if (!isAuthenticated()) return;
+            
+            try {
+                const carrinho = await API.getCarrinho();
+                const totalItens = carrinho.items?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) cartCount.textContent = totalItens;
+            } catch (error) {
+                console.error('Erro ao carregar carrinho:', error);
+            }
+        }
+    </script>
+</body>
+</html>
