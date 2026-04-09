@@ -63,6 +63,7 @@ async function adicionarAoCarrinho(produtoId) {
 async function carregarDetalheProduto() {
     const urlParams = new URLSearchParams(window.location.search);
     const produtoId = urlParams.get('id');
+    const container = document.getElementById('product-detail');
     
     if (!produtoId) {
         window.location.href = 'index.html';
@@ -72,19 +73,42 @@ async function carregarDetalheProduto() {
     try {
         const produto = await API.getProduto(produtoId);
         
-        document.getElementById('produto-nome').textContent = produto.nome;
-        document.getElementById('produto-preco').textContent = formatarMoeda(produto.preco);
-        document.getElementById('produto-descricao').textContent = produto.descricao || 'Sem descrição';
-        document.getElementById('produto-vendedor').textContent = produto.vendedor_nome;
-        document.getElementById('produto-disponivel').textContent = `${produto.disponivel} unidades disponíveis`;
+        // Criar o HTML do produto dinamicamente
+        container.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <img src="${produto.imagem_url || 'assets/img/placeholder.jpg'}" 
+                         alt="${produto.nome}" 
+                         style="width: 100%; border-radius: 12px;"
+                         onerror="this.src='assets/img/placeholder.jpg'">
+                </div>
+                <div>
+                    <h1 id="produto-nome" style="margin-bottom: 16px;">${produto.nome}</h1>
+                    <p id="produto-preco" style="font-size: 2rem; color: var(--primary); font-weight: bold; margin-bottom: 16px;">
+                        ${formatarMoeda(produto.preco)}
+                    </p>
+                    <p id="produto-descricao" style="color: var(--text-secondary); margin-bottom: 16px;">
+                        ${produto.descricao || 'Sem descrição'}
+                    </p>
+                    <p id="produto-vendedor" style="margin-bottom: 8px;">
+                        <strong>Vendido por:</strong> ${produto.vendedor_nome}
+                    </p>
+                    <p id="produto-disponivel" style="margin-bottom: 24px;">
+                        <strong>Disponível:</strong> ${produto.disponivel} unidades
+                    </p>
+                    <button id="btn-comprar" class="btn-primary" style="width: 100%; padding: 15px;">
+                        Adicionar ao Carrinho
+                    </button>
+                </div>
+            </div>
+        `;
         
-        const img = document.getElementById('produto-imagem');
-        img.src = produto.imagem_url || 'assets/img/placeholder.jpg';
-        img.onerror = () => { img.src = 'assets/img/placeholder.jpg'; };
-        
+        // Adicionar evento ao botão após criar o elemento
         document.getElementById('btn-comprar').onclick = () => adicionarAoCarrinho(produto.id_produto);
         
     } catch (error) {
+        console.error('Erro detalhado:', error);
+        container.innerHTML = `<div class="alert alert-error">Erro ao carregar produto: ${error.message}</div>`;
         mostrarMensagem('Erro ao carregar produto', 'error');
     }
 }

@@ -2,13 +2,11 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from config import Config
 from routes import register_routes
-import os
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
+app.url_map.strict_slashes = False
 app.config['SECRET_KEY'] = Config.SECRET_KEY
-app.config['CORS_HEADERS'] = 'Content-Type'
 
-# Configurar CORS corretamente
 CORS(app, 
      origins=['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5000'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
