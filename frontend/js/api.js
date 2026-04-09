@@ -111,5 +111,29 @@ const API = {
     // Vendedor
     getMeusProdutos() {
         return this.request('/vendedor/produtos');
-    }
+    },
+    // Endereços
+listarEnderecos() {
+    return this.request('/enderecos');
+},
+
+criarEndereco(endereco) {
+    return this.request('/enderecos', {
+        method: 'POST',
+        body: JSON.stringify(endereco)
+    });
+},
+
+atualizarEndereco(id, endereco) {
+    return this.request(`/enderecos/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(endereco)
+    });
+},
+
+deletarEndereco(id) {
+    return this.request(`/enderecos/${id}`, {
+        method: 'DELETE'
+    });
+}
 };

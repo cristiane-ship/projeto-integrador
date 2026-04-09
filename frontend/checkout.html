@@ -1,4 +1,3 @@
- 
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -25,17 +24,20 @@
         <h1>Finalizar Compra</h1>
         
         <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--spacing-xl);">
+            <!-- Coluna da esquerda - Endereços -->
             <div>
-                <div class="form-section">
-                    <h3>Endereço de Entrega</h3>
+                <div class="form-section" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+                    <h3 style="margin-bottom: var(--spacing-md);">Endereço de Entrega</h3>
                     <div id="enderecos-container">
                         <div class="loading-spinner">Carregando endereços...</div>
                     </div>
-                    <button class="btn-outline" onclick="mostrarModalEndereco()">+ Novo Endereço</button>
+                    <button class="btn-outline" onclick="window.location.href='perfil.html'" style="margin-top: var(--spacing-md);">
+                        + Gerenciar Endereços
+                    </button>
                 </div>
                 
-                <div class="form-section">
-                    <h3>Forma de Pagamento</h3>
+                <div class="form-section" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                    <h3 style="margin-bottom: var(--spacing-md);">Forma de Pagamento</h3>
                     <div class="form-group">
                         <select id="pagamento-metodo" class="form-control">
                             <option value="simulado">Simular Pagamento (Teste)</option>
@@ -44,7 +46,8 @@
                 </div>
             </div>
             
-            <div class="carrinho-resumo">
+            <!-- Coluna da direita - Resumo -->
+            <div class="carrinho-resumo" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg); position: sticky; top: 100px;">
                 <h3>Resumo do Pedido</h3>
                 <div id="resumo-pedido">
                     <div class="loading-spinner">Carregando...</div>
@@ -53,50 +56,6 @@
             </div>
         </div>
     </main>
-
-    <div id="modal-endereco" class="modal">
-        <div class="modal-content">
-            <h2>Novo Endereço</h2>
-            <form id="endereco-form">
-                <div class="form-group">
-                    <label>CEP</label>
-                    <input type="text" id="cep" oninput="mascaraCEP(this)" required>
-                </div>
-                <div class="form-group">
-                    <label>Logradouro</label>
-                    <input type="text" id="logradouro" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Número</label>
-                        <input type="text" id="numero" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Complemento</label>
-                        <input type="text" id="complemento">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Bairro</label>
-                    <input type="text" id="bairro" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Cidade</label>
-                        <input type="text" id="cidade" required>
-                    </div>
-                    <div class="form-group">
-                        <label>UF</label>
-                        <input type="text" id="estado" maxlength="2" required>
-                    </div>
-                </div>
-                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
-                    <button type="submit" class="btn-primary">Salvar</button>
-                    <button type="button" class="btn-outline" onclick="fecharModalEndereco()">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <footer class="footer">
         <div class="container">
@@ -116,7 +75,7 @@
             await verificarAutenticacao(true);
             atualizarMenuUsuario();
             await carregarResumoPedido();
-            await carregarEnderecos();
+            await carregarEnderecosCheckout();
         });
     </script>
 </body>

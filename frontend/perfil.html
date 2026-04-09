@@ -24,17 +24,19 @@
         <h1>Meu Perfil</h1>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-lg);">
-            <div class="perfil-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+            <!-- Dados Pessoais -->
+            <div style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
                 <h3>Dados Pessoais</h3>
                 <div id="dados-usuario">
                     <div class="loading-spinner">Carregando...</div>
                 </div>
             </div>
             
-            <div class="enderecos-card" style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+            <!-- Endereços -->
+            <div style="background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
                     <h3>Meus Endereços</h3>
-                    <button class="btn-outline" onclick="mostrarModalEndereco()" style="padding: 6px 12px;">+ Novo</button>
+                    <button class="btn-primary" onclick="mostrarModalEndereco()" style="padding: 8px 16px;">+ Novo Endereço</button>
                 </div>
                 <div id="lista-enderecos">
                     <div class="loading-spinner">Carregando endereços...</div>
@@ -43,21 +45,27 @@
         </div>
     </main>
 
+    <!-- Modal de Endereço -->
     <div id="modal-endereco" class="modal">
         <div class="modal-content">
-            <h2>Novo Endereço</h2>
+            <h2 id="modal-titulo">Novo Endereço</h2>
             <form id="endereco-form">
+                <input type="hidden" id="endereco-id" value="">
+                
                 <div class="form-group">
-                    <label>CEP</label>
-                    <input type="text" id="cep" oninput="mascaraCEP(this)" required>
+                    <label>CEP *</label>
+                    <input type="text" id="cep" placeholder="00000-000" oninput="mascaraCEP(this)" required>
+                    <button type="button" class="btn-outline" onclick="buscarCep()" style="margin-top: 8px; padding: 6px 12px;">Buscar CEP</button>
                 </div>
+                
                 <div class="form-group">
-                    <label>Logradouro</label>
+                    <label>Logradouro *</label>
                     <input type="text" id="logradouro" required>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Número</label>
+                        <label>Número *</label>
                         <input type="text" id="numero" required>
                     </div>
                     <div class="form-group">
@@ -65,20 +73,40 @@
                         <input type="text" id="complemento">
                     </div>
                 </div>
+                
                 <div class="form-group">
-                    <label>Bairro</label>
+                    <label>Bairro *</label>
                     <input type="text" id="bairro" required>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Cidade</label>
+                        <label>Cidade *</label>
                         <input type="text" id="cidade" required>
                     </div>
                     <div class="form-group">
-                        <label>UF</label>
-                        <input type="text" id="estado" maxlength="2" required>
+                        <label>UF *</label>
+                        <select id="estado" required>
+                            <option value="">Selecione</option>
+                            <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                            <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                            <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                            <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                            <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                            <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                            <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                            <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                            <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                        </select>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="principal"> Definir como endereço principal
+                    </label>
+                </div>
+                
                 <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
                     <button type="submit" class="btn-primary">Salvar</button>
                     <button type="button" class="btn-outline" onclick="fecharModalEndereco()">Cancelar</button>
@@ -97,9 +125,8 @@
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/enderecos.js"></script>
     <script>
-        let enderecos = [];
-        
         document.addEventListener('DOMContentLoaded', async () => {
             await verificarAutenticacao(true);
             atualizarMenuUsuario();
@@ -119,19 +146,19 @@
                 
                 if (response.ok) {
                     container.innerHTML = `
-                        <div class="info-row" style="margin-bottom: var(--spacing-md);">
+                        <div style="margin-bottom: var(--spacing-md);">
                             <strong>Nome:</strong>
                             <p>${user.nome}</p>
                         </div>
-                        <div class="info-row" style="margin-bottom: var(--spacing-md);">
+                        <div style="margin-bottom: var(--spacing-md);">
                             <strong>E-mail:</strong>
                             <p>${user.email}</p>
                         </div>
-                        <div class="info-row" style="margin-bottom: var(--spacing-md);">
+                        <div style="margin-bottom: var(--spacing-md);">
                             <strong>Tipo:</strong>
                             <p>${user.role === 'vendedor' ? 'Vendedor' : user.role === 'admin' ? 'Administrador' : 'Cliente'}</p>
                         </div>
-                        <div class="info-row">
+                        <div>
                             <strong>Cadastrado em:</strong>
                             <p>${formatarData(user.data_cadastro)}</p>
                         </div>
@@ -143,41 +170,6 @@
                 container.innerHTML = `<div class="alert alert-error">Erro ao carregar dados</div>`;
             }
         }
-        
-        async function carregarEnderecos() {
-            const container = document.getElementById('lista-enderecos');
-            
-            // Simular endereços por enquanto (backend será implementado depois)
-            container.innerHTML = `
-                <div class="endereco-item" style="padding: var(--spacing-md); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
-                    <p><strong>Rua Exemplo, 123</strong></p>
-                    <p>Centro - São Paulo/SP</p>
-                    <p>CEP: 00000-000</p>
-                    <button class="btn-outline" style="margin-top: var(--spacing-sm); padding: 4px 12px; font-size: 0.8rem;">Editar</button>
-                </div>
-                <div class="endereco-item" style="padding: var(--spacing-md); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
-                    <p><strong>Av. Paulista, 1000</strong></p>
-                    <p>Bela Vista - São Paulo/SP</p>
-                    <p>CEP: 01310-000</p>
-                    <button class="btn-outline" style="margin-top: var(--spacing-sm); padding: 4px 12px; font-size: 0.8rem;">Editar</button>
-                </div>
-            `;
-        }
-        
-        function mostrarModalEndereco() {
-            document.getElementById('modal-endereco').classList.add('active');
-        }
-        
-        function fecharModalEndereco() {
-            document.getElementById('modal-endereco').classList.remove('active');
-            document.getElementById('endereco-form').reset();
-        }
-        
-        document.getElementById('endereco-form')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            mostrarMensagem('Funcionalidade em desenvolvimento', 'warning');
-            fecharModalEndereco();
-        });
     </script>
 </body>
-</html> 
+</html>

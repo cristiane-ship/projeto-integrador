@@ -409,7 +409,6 @@ body {
     border-left: 4px solid var(--warning);
 }
 
-/* Modal */
 .modal {
     display: none;
     position: fixed;
