@@ -1,8 +1,15 @@
- 
-// Listagem de Produtos
+let carregandoProdutos = false;
+let produtosCarregados = false;
+
 async function carregarProdutos(filtros = {}) {
+    // Evitar recarregamento duplicado
+    if (carregandoProdutos) return;
+    if (produtosCarregados && Object.keys(filtros).length === 0) return;
+    
     const container = document.getElementById('products-grid');
     if (!container) return;
+    
+    carregandoProdutos = true;
     
     try {
         const produtos = await API.listarProdutos(filtros);
@@ -13,28 +20,33 @@ async function carregarProdutos(filtros = {}) {
         }
         
         container.innerHTML = produtos.map(produto => `
-            <div class="product-card">
-                <img src="${produto.imagem_url || 'assets/img/placeholder.jpg'}" 
-                     alt="${produto.nome}" 
-                     class="product-image"
-                     onerror="this.src='assets/img/placeholder.jpg'">
-                <div class="product-info">
-                    <h3 class="product-title">${produto.nome}</h3>
-                    <p class="product-price">${formatarMoeda(produto.preco)}</p>
-                    <p class="product-vendedor" style="font-size: 0.8rem; color: var(--text-secondary);">
-                        Vendido por: ${produto.vendedor_nome}
-                    </p>
-                    <div style="display: flex; gap: 8px; margin-top: 12px;">
-                        <a href="produto.html?id=${produto.id_produto}" class="btn-secondary" style="flex: 1; text-align: center; padding: 8px;">Ver</a>
-                        <button onclick="adicionarAoCarrinho(${produto.id_produto})" class="btn-primary" style="flex: 1; padding: 8px;">Comprar</button>
-                    </div>
-                </div>
+    <div class="product-card">
+        <img src="${produto.imagem_url || 'assets/img/placeholder.jpg'}" 
+             alt="${produto.nome}" 
+             class="product-image"
+             loading="lazy"
+             onerror="this.onerror=null; this.src='assets/img/placeholder.jpg'">
+        <div class="product-info">
+            <h3 class="product-title">${produto.nome}</h3>
+            <p class="product-price">${formatarMoeda(produto.preco)}</p>
+            <p class="product-vendedor" style="font-size: 0.8rem; color: var(--text-secondary);">
+                Vendido por: ${produto.vendedor_nome}
+            </p>
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <a href="produto.html?id=${produto.id_produto}" class="btn-secondary" style="flex: 1; text-align: center; padding: 8px;">Ver</a>
+                <button onclick="adicionarAoCarrinho(${produto.id_produto})" class="btn-primary" style="flex: 1; padding: 8px;">Comprar</button>
             </div>
-        `).join('');
+        </div>
+    </div>
+`).join('');
+        
+        produtosCarregados = true;
         
     } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
         container.innerHTML = '<p class="loading-spinner">Erro ao carregar produtos. Tente novamente.</p>';
-        console.error(error);
+    } finally {
+        carregandoProdutos = false;
     }
 }
 
@@ -52,7 +64,12 @@ async function adicionarAoCarrinho(produtoId) {
     try {
         await API.adicionarAoCarrinho(produtoId, 1);
         mostrarMensagem('Produto adicionado ao carrinho!');
-        atualizarContadorCarrinho();
+        
+        // Atualizar apenas o contador, não recarregar produtos
+        if (typeof atualizarContadorCarrinho === 'function') {
+            await atualizarContadorCarrinho();
+        }
+        
     } catch (error) {
         mostrarMensagem(error.message, 'error');
     } finally {
@@ -70,10 +87,11 @@ async function carregarDetalheProduto() {
         return;
     }
     
+    if (!container) return;
+    
     try {
         const produto = await API.getProduto(produtoId);
         
-        // Criar o HTML do produto dinamicamente
         container.innerHTML = `
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
                 <div>
@@ -83,17 +101,17 @@ async function carregarDetalheProduto() {
                          onerror="this.src='assets/img/placeholder.jpg'">
                 </div>
                 <div>
-                    <h1 id="produto-nome" style="margin-bottom: 16px;">${produto.nome}</h1>
-                    <p id="produto-preco" style="font-size: 2rem; color: var(--primary); font-weight: bold; margin-bottom: 16px;">
+                    <h1 style="margin-bottom: 16px;">${produto.nome}</h1>
+                    <p style="font-size: 2rem; color: var(--primary); font-weight: bold; margin-bottom: 16px;">
                         ${formatarMoeda(produto.preco)}
                     </p>
-                    <p id="produto-descricao" style="color: var(--text-secondary); margin-bottom: 16px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
                         ${produto.descricao || 'Sem descrição'}
                     </p>
-                    <p id="produto-vendedor" style="margin-bottom: 8px;">
+                    <p style="margin-bottom: 8px;">
                         <strong>Vendido por:</strong> ${produto.vendedor_nome}
                     </p>
-                    <p id="produto-disponivel" style="margin-bottom: 24px;">
+                    <p style="margin-bottom: 24px;">
                         <strong>Disponível:</strong> ${produto.disponivel} unidades
                     </p>
                     <button id="btn-comprar" class="btn-primary" style="width: 100%; padding: 15px;">
@@ -103,7 +121,6 @@ async function carregarDetalheProduto() {
             </div>
         `;
         
-        // Adicionar evento ao botão após criar o elemento
         document.getElementById('btn-comprar').onclick = () => adicionarAoCarrinho(produto.id_produto);
         
     } catch (error) {
@@ -113,15 +130,17 @@ async function carregarDetalheProduto() {
     }
 }
 
-async function atualizarContadorCarrinho() {
-    if (!isAuthenticated()) return;
-    
-    try {
-        const carrinho = await API.getCarrinho();
-        const totalItens = carrinho.items?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
-        const cartCount = document.getElementById('cart-count');
-        if (cartCount) cartCount.textContent = totalItens;
-    } catch (error) {
-        console.error('Erro ao carregar carrinho:', error);
-    }
+if (typeof atualizarContadorCarrinho === 'undefined') {
+    window.atualizarContadorCarrinho = async function() {
+        if (!isAuthenticated()) return;
+        
+        try {
+            const carrinho = await API.getCarrinho();
+            const totalItens = carrinho.items?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) cartCount.textContent = totalItens;
+        } catch (error) {
+            console.error('Erro ao carregar carrinho:', error);
+        }
+    };
 }
