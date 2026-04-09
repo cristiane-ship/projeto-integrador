@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 from config import Config
 from routes import register_routes
@@ -31,7 +31,7 @@ def serve_js(path):
 def serve_assets(path):
     return send_from_directory('../frontend/assets', path)
 
-# Servir páginas HTML - CORREÇÃO PRINCIPAL
+# Servir páginas HTML
 @app.route('/')
 def serve_index():
     return send_from_directory('../frontend', 'index.html')
@@ -40,16 +40,24 @@ def serve_index():
 def serve_html(filename):
     return send_from_directory('../frontend', f'{filename}.html')
 
+# OPCIONAL: Servir sem a extensão .html (ex: /produto?id=1)
+@app.route('/<path:filename>')
+def serve_html_without_extension(filename):
+    # Se o arquivo existe com .html
+    html_path = os.path.join('../frontend', f'{filename}.html')
+    if os.path.exists(html_path):
+        return send_from_directory('../frontend', f'{filename}.html')
+    # Se não, passa para o próximo handler
+    return send_from_directory('../frontend', 'index.html')
+
 @app.errorhandler(404)
 def page_not_found(e):
-    # Se for uma requisição de API, retorna JSON
     if request.path.startswith('/api/'):
         return jsonify({'error': 'Rota não encontrada'}), 404
-    # Senão, tenta servir o index.html (para SPA)
     return send_from_directory('../frontend', 'index.html')
 
 if __name__ == '__main__':
     print(f"🚀 Servidor rodando em http://localhost:{Config.PORT}")
     print(f"📁 Frontend disponível em http://localhost:{Config.PORT}")
     print(f"📄 Páginas: /login.html, /cadastro.html, /produto.html, etc.")
-    app.run(debug=True, host='0.0.0.0', port=Config.PORT)
+    app.run(debug=True, port=Config.PORT)  # SEM host='0.0.0.0'
